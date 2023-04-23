@@ -1,0 +1,33 @@
+from flask import Flask, redirect, request
+import string
+import random
+
+app = Flask(__name__)
+short_to_long = {}
+
+def generate_short_url():
+    characters = string.ascii_letters + string.digits
+    short_url = ''.join(random.choices(characters, k=6))
+    return short_url
+
+@app.route('/')
+def index():
+    return 'Welcome to URL shortener!'
+
+@app.route('/shorten', methods=['POST'])
+def shorten():
+    long_url = request.form['url']
+    short_url = generate_short_url()
+    short_to_long[short_url] = long_url
+    return 'Short URL: {}{}'.format(request.host_url, short_url)
+
+@app.route('/<short_url>')
+def redirect_url(short_url):
+    long_url = short_to_long.get(short_url)
+    if long_url:
+        return redirect(long_url)
+    else:
+        return 'URL not found!'
+
+if __name__ == '__main__':
+    app.run(debug=True)
